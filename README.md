@@ -44,9 +44,10 @@ The bot fetches stock prices from a mock API and logs every trade made.
 
 ### Mock API
 
-The application includes a mock API that simulates stock prices. It can be run on a separate port (default: 5000). 
+The application includes a mock API that simulates stock prices.
 
-- **Endpoint**: `/price`
+- **MOCK API**: `https://mockapi-bk5d.onrender.com`
+- **Endpoint**: `/mock-stock-price`
 - **Response**: Returns a random stock price between 100 and 500.
   
 Example Response:
@@ -83,10 +84,10 @@ Ensure that you have the following installed on your system:
    npm install
 
 3. **Set Up Environment Variables**: 
-   Create a .env file in the root directory of the project and set the necessary environment variables : 
+   Create a .env file in the root directory of the project and set the necessary environment variables as below : 
 
-    PORT =
-    MOCK_API_URL =
+    PORT = 3000
+    MOCK_API_URL = https://mockapi-bk5d.onrender.com/mock-stock-price
 
 
 ## Script Commands
@@ -96,11 +97,10 @@ The following npm scripts are available to run different parts of the applicatio
 ```json
 "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/app.js & node src/index.js & node src/mockApi.js",
+    "start": "node src/app.js & node src/index.js",
     "dev:app": "nodemon src/app.js",
     "dev:cli": "nodemon src/index.js",
-    "dev:mock": "nodemon src/mockApi.js",
-    "dev:all": "nodemon --exec \"node src/app.js & node src/index.js & node src/mockApi.js\""
+    "dev:all": "nodemon --exec \"node src/app.js & node src/index.js\""
 }
 
 

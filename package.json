@@ -5,11 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/app.js & node src/index.js & node src/mockApi.js",
+    "start": "node src/app.js & node src/index.js",
     "dev:app": "nodemon src/app.js",
     "dev:cli": "nodemon src/index.js",
-    "dev:mock": "nodemon src/mockApi.js",
-    "dev:all": "nodemon --exec \"node src/app.js & node src/index.js & node src/mockApi.js\""
+    "dev:all": "nodemon --exec \"node src/app.js & node src/index.js\""
 },
   "keywords": [],
   "author": "",
