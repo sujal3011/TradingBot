@@ -3,7 +3,7 @@ const { startBot, stopBot, getSummaryReport } = require('./tradingBot');
 
 let selectedStrategy = null;  // Variable to store the selected strategy
 
-// Create an interface for reading input from the terminal
+// Creating an interface for reading input from the terminal
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -24,10 +24,10 @@ console.log(`
     Please type one of the above commands and press Enter to proceed.
     `);
     
-// Display the prompt
+
 rl.prompt();
 
-// Handle user input
+
 rl.on('line', (input) => {
   const command = input.trim().toLowerCase();
 
@@ -36,17 +36,21 @@ rl.on('line', (input) => {
       console.log('Select a trading strategy:');
       console.log('1. Simple Strategy (Buy when price drops by 2%, Sell when it rises by 3%)');
       console.log('2. Moving Average Crossover Strategy');
-      rl.question('Enter the number of the strategy you want to use (1 or 2): ', (answer) => {
+      console.log('3. Momentum Strategy (Buy when price drops by 2%, Sell when it rises by 3%)');
+      rl.question('Enter the number of the strategy you want to use (1, 2, or 3): ', (answer) => {
         if (answer === '1') {
           selectedStrategy = 'simple';
           console.log('You have selected the Simple Strategy.');
         } else if (answer === '2') {
           selectedStrategy = 'crossover';
           console.log('You have selected the Moving Average Crossover Strategy.');
+        } else if (answer === '3') {
+          selectedStrategy = 'momentum';
+          console.log('You have selected the Momentum Strategy.');
         } else {
-          console.log('Invalid selection. Please choose 1 or 2.');
+          console.log('Invalid selection. Please choose 1, 2, or 3.');
         }
-        rl.prompt();  // Display the prompt again after selection
+        rl.prompt();
       });
       break;
 
@@ -54,7 +58,7 @@ rl.on('line', (input) => {
       if (!selectedStrategy) {
         console.log('Please select a strategy before starting the bot. Use the "strategy" command.');
       } else {
-        startBot(selectedStrategy);  // Pass the selected strategy to the startBot function
+        startBot(selectedStrategy);
       }
       break;
 
@@ -74,13 +78,11 @@ rl.on('line', (input) => {
       console.log('Unknown command. Available commands: strategy, start, stop, report, exit');
   }
 
-  // Display the prompt again after handling input (if not waiting for strategy selection)
   if (command !== 'strategy') {
     rl.prompt();
   }
 });
 
-// Handle exit
 rl.on('close', () => {
   console.log('Exiting the trading bot CLI. Goodbye!');
   process.exit(0);

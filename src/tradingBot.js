@@ -1,5 +1,5 @@
 const axios = require('axios');
-// const logger = require('./logger');
+const logger = require('./logger');
 require('dotenv').config();
 
 let balance = 10000;  // Starting balance
@@ -40,15 +40,15 @@ async function evaluateSimpleStrategy() {
     stockQuantity += quantity;
     balance -= quantity * currentPrice;
     trades.push({ type: 'buy', price: currentPrice, quantity, time: new Date() });
-    // logger.info(`Bought ${quantity} stocks at ${currentPrice}`);
-    console.log(`Bought ${quantity} stocks at ${currentPrice}`);
+    logger.info(`Bought ${quantity} stocks at ${currentPrice}`);
+    // console.log(`Bought ${quantity} stocks at ${currentPrice}`);
   } else if (priceChange >= 3 && stockQuantity > 0) {
     // Sell
     balance += stockQuantity * currentPrice;
     profitLoss += (currentPrice - lastPrice) * stockQuantity;
     trades.push({ type: 'sell', price: currentPrice, quantity: stockQuantity, time: new Date() });
-    // logger.info(`Sold ${stockQuantity} stocks at ${currentPrice}`);
-    console.log(`Sold ${stockQuantity} stocks at ${currentPrice}`);
+    logger.info(`Sold ${stockQuantity} stocks at ${currentPrice}`);
+    // console.log(`Sold ${stockQuantity} stocks at ${currentPrice}`);
     stockQuantity = 0;
   }
 
@@ -60,11 +60,9 @@ async function evaluateMovingAverageCrossoverStrategy() {
   if (!botActive) return;
 
   const currentPrice = await fetchStockPrice();
-  prices.push(currentPrice);  // Adding current price to prices array
-
-  // Keeping only the last MOVING_AVERAGE_PERIOD prices
+  prices.push(currentPrice);
   if (prices.length > MOVING_AVERAGE_PERIOD) {
-    prices.shift();  // Removing the oldest price
+    prices.shift();
   }
 
   // Calculating the moving average
@@ -77,22 +75,22 @@ async function evaluateMovingAverageCrossoverStrategy() {
     stockQuantity += quantity;
     balance -= quantity * currentPrice;
     trades.push({ type: 'buy', price: currentPrice, quantity, time: new Date() });
-    // logger.info(`Bought ${quantity} stocks at ${currentPrice}`);
-    console.log(`Bought ${quantity} stocks at ${currentPrice}`);
+    logger.info(`Bought ${quantity} stocks at ${currentPrice}`);
+    // console.log(`Bought ${quantity} stocks at ${currentPrice}`);
   } else if (currentPrice < movingAverage && stockQuantity > 0) {
     // Sell
     balance += stockQuantity * currentPrice;
     profitLoss += (currentPrice - lastPrice) * stockQuantity;
     trades.push({ type: 'sell', price: currentPrice, quantity: stockQuantity, time: new Date() });
-    // logger.info(`Sold ${stockQuantity} stocks at ${currentPrice}`);
-    console.log(`Sold ${stockQuantity} stocks at ${currentPrice}`);
+    logger.info(`Sold ${stockQuantity} stocks at ${currentPrice}`);
+    // console.log(`Sold ${stockQuantity} stocks at ${currentPrice}`);
     stockQuantity = 0;
   }
 
   lastPrice = currentPrice;  // Updating lastPrice to currentPrice
 }
 
-// Momentum strategy: buy if price increases by 5% in 3 periods, sell if it decreases by 3% in 2 periods
+// Momentum strategy: buying if price increases by 5% in 3 periods, selling if it decreases by 3% in 2 periods
 async function evaluateMomentumStrategy() {
   if (!botActive) return;
 
@@ -104,7 +102,7 @@ async function evaluateMomentumStrategy() {
   }
 
   prices.push(currentPrice);
-  if (prices.length > 3) prices.shift();  // Keep the last 3 prices
+  if (prices.length > 3) prices.shift();
 
   if (prices.length === 3) {
     const priceChange = ((currentPrice - prices[0]) / prices[0]) * 100;
@@ -114,12 +112,14 @@ async function evaluateMomentumStrategy() {
       stockQuantity += quantity;
       balance -= quantity * currentPrice;
       trades.push({ type: 'buy', price: currentPrice, quantity, time: new Date() });
-      console.log(`Bought ${quantity} stocks at ${currentPrice} (Momentum)`);
+      // console.log(`Bought ${quantity} stocks at ${currentPrice} (Momentum)`);
+      logger.info(`Bought ${quantity} stocks at ${currentPrice} (Momentum)`);
     } else if (priceChange <= -3 && stockQuantity > 0) {
       balance += stockQuantity * currentPrice;
       profitLoss += (currentPrice - lastPrice) * stockQuantity;
       trades.push({ type: 'sell', price: currentPrice, quantity: stockQuantity, time: new Date() });
-      console.log(`Sold ${stockQuantity} stocks at ${currentPrice} (Momentum)`);
+      // console.log(`Sold ${stockQuantity} stocks at ${currentPrice} (Momentum)`);
+      logger.info(`Sold ${stockQuantity} stocks at ${currentPrice} (Momentum)`);
       stockQuantity = 0;
     }
   }
@@ -141,7 +141,8 @@ async function evaluateStrategy() {
 // Function to start the bot
 function startBot(strategy) {
   if (intervalId) {
-    console.log('Bot is already running!');  // Bot is already running
+    // console.log('Bot is already running!');  // Bot is already running
+    logger.warn('Bot is already running!');
     return;
   }
   botActive = true;
@@ -149,22 +150,27 @@ function startBot(strategy) {
   // Storing the selected strategy
   if (strategy === 'simple') {
     selectedStrategy = 'simple'
-    console.log('Starting the bot with Simple Strategy.');
+    // console.log('Starting the bot with Simple Strategy.');
+    logger.info('Starting the bot with Simple Strategy.'); 
   } else if (strategy === 'crossover') {
     selectedStrategy = 'crossover'
-    console.log('Starting the bot with Moving Average Crossover Strategy.');
+    // console.log('Starting the bot with Moving Average Crossover Strategy.');
+    logger.info('Starting the bot with Moving Average Crossover Strategy.');
   } else if (strategy === 'momentum') {
     selectedStrategy = 'momentum'
-    console.log('Starting the bot with Momentum Strategy.');
+    // console.log('Starting the bot with Momentum Strategy.');
+    logger.info('Starting the bot with Momentum Strategy.');
   }else {
-    console.log('Invalid strategy selected.');
+    // console.log('Invalid strategy selected.');
+    logger.info('Invalid strategy selected.');
     return;
   }
 
   intervalId = setInterval(() => {
     evaluateStrategy().catch(console.error);
   }, 5000);  // Checking every 5 seconds
-  console.log('Bot started!');
+  // console.log('Bot started!');
+  logger.info('Bot started!'); 
 }
 
 // Function to stop the bot
@@ -173,22 +179,39 @@ function stopBot() {
     clearInterval(intervalId);
     intervalId = null;
     botActive = false;
-    console.log('Bot stopped!');
+    // console.log('Bot stopped!');
+    logger.info('Bot stopped!');
   }
 }
 
 // Generating summary report 
 function getSummaryReport() {
+  logger.info("Generating summary report..."); // Logging when generating the report
+  
+  // Logging each trade
+  logger.info("Trades made:");
+  trades.forEach(trade => {
+    const tradeInfo = `${trade.time.toISOString()} - ${trade.type.toUpperCase()}: ${trade.quantity} stocks at $${trade.price}`;
+    logger.info(tradeInfo);
+    console.log(tradeInfo);
+  });
+  
+  // Logging summary details
+  const finalBalanceInfo = `Final Balance: $${balance.toFixed(2)}`;
+  const profitLossInfo = `Total Profit/Loss: $${profitLoss.toFixed(2)}`;
+  const stocksHeldInfo = `Stocks Held: ${stockQuantity}`;
+
+  logger.info(finalBalanceInfo);
+  logger.info(profitLossInfo);
+  logger.info(stocksHeldInfo);
+
+  // Printing summary details to console
   console.log("\nSummary Report:");
   console.log("-----------------------------");
-  trades.forEach(trade => {
-    console.log(`${trade.time.toISOString()} - ${trade.type.toUpperCase()}: ${trade.quantity} stocks at $${trade.price}`);
-  });
+  console.log(finalBalanceInfo);
+  console.log(profitLossInfo);
+  console.log(stocksHeldInfo);
   console.log("-----------------------------");
-  console.log(`Final Balance: $${balance.toFixed(2)}`);
-  console.log(`Total Profit/Loss: $${profitLoss.toFixed(2)}`);
-  console.log(`Stocks Held: ${stockQuantity}`);
   console.log("\n");
 }
-
 module.exports = { startBot, stopBot, getSummaryReport };
