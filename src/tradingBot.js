@@ -92,12 +92,49 @@ async function evaluateMovingAverageCrossoverStrategy() {
   lastPrice = currentPrice;  // Updating lastPrice to currentPrice
 }
 
+// Momentum strategy: buy if price increases by 5% in 3 periods, sell if it decreases by 3% in 2 periods
+async function evaluateMomentumStrategy() {
+  if (!botActive) return;
+
+  const currentPrice = await fetchStockPrice();
+
+  if (!lastPrice) {
+    lastPrice = currentPrice;  // Set initial price
+    return;
+  }
+
+  prices.push(currentPrice);
+  if (prices.length > 3) prices.shift();  // Keep the last 3 prices
+
+  if (prices.length === 3) {
+    const priceChange = ((currentPrice - prices[0]) / prices[0]) * 100;
+
+    if (priceChange >= 5 && balance >= currentPrice) {
+      const quantity = Math.floor(balance / currentPrice);
+      stockQuantity += quantity;
+      balance -= quantity * currentPrice;
+      trades.push({ type: 'buy', price: currentPrice, quantity, time: new Date() });
+      console.log(`Bought ${quantity} stocks at ${currentPrice} (Momentum)`);
+    } else if (priceChange <= -3 && stockQuantity > 0) {
+      balance += stockQuantity * currentPrice;
+      profitLoss += (currentPrice - lastPrice) * stockQuantity;
+      trades.push({ type: 'sell', price: currentPrice, quantity: stockQuantity, time: new Date() });
+      console.log(`Sold ${stockQuantity} stocks at ${currentPrice} (Momentum)`);
+      stockQuantity = 0;
+    }
+  }
+
+  lastPrice = currentPrice;
+}
+
 // Evaluating strategy based on selected strategy
 async function evaluateStrategy() {
   if (selectedStrategy === 'simple') {
     await evaluateSimpleStrategy();
   } else if (selectedStrategy === 'crossover') {
     await evaluateMovingAverageCrossoverStrategy();
+  } else if (selectedStrategy === 'momentum') {
+    await evaluateMomentumStrategy();
   }
 }
 
@@ -116,7 +153,10 @@ function startBot(strategy) {
   } else if (strategy === 'crossover') {
     selectedStrategy = 'crossover'
     console.log('Starting the bot with Moving Average Crossover Strategy.');
-  } else {
+  } else if (strategy === 'momentum') {
+    selectedStrategy = 'momentum'
+    console.log('Starting the bot with Momentum Strategy.');
+  }else {
     console.log('Invalid strategy selected.');
     return;
   }
