@@ -9,6 +9,9 @@ let trades = [];
 let profitLoss = 0;
 let intervalId = null;  // To control the bot
 let botActive = false;  // To check if the bot is active
+let prices = [];  // Array to store prices for moving average calculation
+const MOVING_AVERAGE_PERIOD = 5;  // Number of periods for moving average
+let selectedStrategy = null; 
 
 const MOCK_API_URL = process.env.MOCK_API_URL || "https://api.mock.com/stock";
 
@@ -18,14 +21,14 @@ async function fetchStockPrice() {
   return response.data.price;
 }
 
-// Simple strategy: buy when price drops by 2%, sell when it rises by 3%
-async function evaluateStrategy() {
+// Simple strategy: buying when price drops by 2%, selling when it rises by 3%
+async function evaluateSimpleStrategy() {
   if (!botActive) return;
 
   const currentPrice = await fetchStockPrice();
 
   if (!lastPrice) {
-    lastPrice = currentPrice;  // Set initial price
+    lastPrice = currentPrice;  // Setting initial price
     return;
   }
 
@@ -52,16 +55,75 @@ async function evaluateStrategy() {
   lastPrice = currentPrice;
 }
 
+// Moving Average Crossover strategy
+async function evaluateMovingAverageCrossoverStrategy() {
+  if (!botActive) return;
+
+  const currentPrice = await fetchStockPrice();
+  prices.push(currentPrice);  // Adding current price to prices array
+
+  // Keeping only the last MOVING_AVERAGE_PERIOD prices
+  if (prices.length > MOVING_AVERAGE_PERIOD) {
+    prices.shift();  // Removing the oldest price
+  }
+
+  // Calculating the moving average
+  const movingAverage = prices.reduce((acc, price) => acc + price, 0) / prices.length;
+
+  // Trading logic based on moving average
+  if (currentPrice > movingAverage && balance >= currentPrice) {
+    // Buy
+    const quantity = Math.floor(balance / currentPrice);
+    stockQuantity += quantity;
+    balance -= quantity * currentPrice;
+    trades.push({ type: 'buy', price: currentPrice, quantity, time: new Date() });
+    // logger.info(`Bought ${quantity} stocks at ${currentPrice}`);
+    console.log(`Bought ${quantity} stocks at ${currentPrice}`);
+  } else if (currentPrice < movingAverage && stockQuantity > 0) {
+    // Sell
+    balance += stockQuantity * currentPrice;
+    profitLoss += (currentPrice - lastPrice) * stockQuantity;
+    trades.push({ type: 'sell', price: currentPrice, quantity: stockQuantity, time: new Date() });
+    // logger.info(`Sold ${stockQuantity} stocks at ${currentPrice}`);
+    console.log(`Sold ${stockQuantity} stocks at ${currentPrice}`);
+    stockQuantity = 0;
+  }
+
+  lastPrice = currentPrice;  // Updating lastPrice to currentPrice
+}
+
+// Evaluating strategy based on selected strategy
+async function evaluateStrategy() {
+  if (selectedStrategy === 'simple') {
+    await evaluateSimpleStrategy();
+  } else if (selectedStrategy === 'crossover') {
+    await evaluateMovingAverageCrossoverStrategy();
+  }
+}
+
 // Function to start the bot
-function startBot() {
+function startBot(strategy) {
   if (intervalId) {
-    console.log('Bot is already running!');  // bot is already running, no need to start again
+    console.log('Bot is already running!');  // Bot is already running
     return;
   }
   botActive = true;
+
+  // Storing the selected strategy
+  if (strategy === 'simple') {
+    selectedStrategy = 'simple'
+    console.log('Starting the bot with Simple Strategy.');
+  } else if (strategy === 'crossover') {
+    selectedStrategy = 'crossover'
+    console.log('Starting the bot with Moving Average Crossover Strategy.');
+  } else {
+    console.log('Invalid strategy selected.');
+    return;
+  }
+
   intervalId = setInterval(() => {
     evaluateStrategy().catch(console.error);
-  }, 5000);  // Check every 5 seconds
+  }, 5000);  // Checking every 5 seconds
   console.log('Bot started!');
 }
 
