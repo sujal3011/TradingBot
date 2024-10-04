@@ -8,6 +8,7 @@ A simple trading bot that employs various trading strategies to simulate stock t
 - [Trading Logic](#trading-logic)
 - [API Usage](#api-usage)
 - [Setup and Installation](#setup-and-installation)
+- [Application Usage](#application-usage)
 - [Script Commands](#script-commands)
 - [CLI Interface](#cli-interface)
 - [Web Interface](#web-interface)
@@ -46,16 +47,17 @@ The bot fetches stock prices from a mock API and logs every trade made.
 
 The application includes a mock API that simulates stock prices.
 
-- **MOCK API**: `https://mockapi-bk5d.onrender.com`
+- **API**: `https://mockapi-bk5d.onrender.com`
 - **Endpoint**: `/mock-stock-price`
 - **Response**: Returns a random stock price between 100 and 500.
+
   
 Example Response:
 ```json
 {
   "price": 238
 }
-
+```
 
 ## Setup and Installation
 
@@ -76,8 +78,6 @@ Ensure that you have the following installed on your system:
    ```bash
    git clone https://github.com/sujal3011/TradingBot.git
 
-
-
 2. **Install Dependencies**: 
    Install all required dependencies using npm : 
    ```bash
@@ -85,9 +85,17 @@ Ensure that you have the following installed on your system:
 
 3. **Set Up Environment Variables**: 
    Create a .env file in the root directory of the project and set the necessary environment variables as below : 
-
-    PORT = 3000
+    ```bash
+    PORT = 3000  
     MOCK_API_URL = https://mockapi-bk5d.onrender.com/mock-stock-price
+
+## Application Usage
+
+The application provides two types of interface :
+
+1. **CLI Interface** : provides a command-line interface for interacting with the bot directly through the terminal.
+   
+2. **Web Interface** : Express.js provides a web interface where we interact with the bot by making HTTP requests, e.g., via a browser or an API client like Postman.
 
 
 ## Script Commands
@@ -102,16 +110,32 @@ The following npm scripts are available to run different parts of the applicatio
     "dev:cli": "nodemon src/index.js",
     "dev:all": "nodemon --exec \"node src/app.js & node src/index.js\""
 }
+```
 
+## CLI Interface
 
+Start using the CLI interface by running the following command :
 
-## Using CLI Interface
-    Start using the CLI interface by running the following command :
-    ```bash
-    npm run dev:cli
+```
+npm run dev:cli
+```
 
+### CLI Interface commands
 
-## Using Web Interface
-    Start the Express.js server by running the following command :
-    ```bash
-    npm run dev:app
+After running the CLI interface, we can use the following commands to control the bot:
+
+1. **strategy** : The strategy command allows you to select the trading strategy the bot will use. The available strategies include the Simple Strategy, Moving Average Crossover Strategy, and Momentum Strategy. 
+   
+2. **start** : The start command initializes the bot and begins the execution of the selected trading strategy. Once the bot is started, it will begin fetching stock prices from the mock API and applying the defined trading logic based on the selected strategy.
+
+3. **stop** : he stop command halts the trading bot. This stops the execution of the selected strategy and prevents any further trades from being made. The bot remains idle until it is started again using the start command.
+   
+4. **report** : The report command generates a summary report of the trades executed by the bot during the runtime. The report includes the number of trades, total profit or loss, and key details about executed trades.
+
+## Web Interface
+
+Start the Express.js server by running the following command :
+
+```
+npm run dev:app
+```
