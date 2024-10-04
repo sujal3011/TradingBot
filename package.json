@@ -4,10 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
-  },
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "start": "node src/app.js & node src/index.js",
+  "dev:app": "nodemon src/app.js",
+  "dev:cli": "nodemon src/index.js",
+  "dev:all": "nodemon --exec \"node src/app.js & node src/index.js\""
+},
   "keywords": [],
   "author": "",
   "license": "ISC",

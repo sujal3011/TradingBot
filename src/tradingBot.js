@@ -38,12 +38,14 @@ async function evaluateStrategy() {
     balance -= quantity * currentPrice;
     trades.push({ type: 'buy', price: currentPrice, quantity, time: new Date() });
     // logger.info(`Bought ${quantity} stocks at ${currentPrice}`);
+    console.log(`Bought ${quantity} stocks at ${currentPrice}`);
   } else if (priceChange >= 3 && stockQuantity > 0) {
     // Sell
     balance += stockQuantity * currentPrice;
     profitLoss += (currentPrice - lastPrice) * stockQuantity;
     trades.push({ type: 'sell', price: currentPrice, quantity: stockQuantity, time: new Date() });
     // logger.info(`Sold ${stockQuantity} stocks at ${currentPrice}`);
+    console.log(`Sold ${stockQuantity} stocks at ${currentPrice}`);
     stockQuantity = 0;
   }
 
@@ -52,11 +54,14 @@ async function evaluateStrategy() {
 
 // Function to start the bot
 function startBot() {
-  if (intervalId) return;  // Prevent multiple intervals
+  if (intervalId) {
+    console.log('Bot is already running!');  // bot is already running, no need to start again
+    return;
+  }
   botActive = true;
   intervalId = setInterval(() => {
     evaluateStrategy().catch(console.error);
-  }, 10000);  // Check every 10 seconds
+  }, 5000);  // Check every 5 seconds
   console.log('Bot started!');
 }
 
