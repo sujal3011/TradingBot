@@ -13,14 +13,17 @@ let prices = [];  // Array to store prices for moving average calculation
 const MOVING_AVERAGE_PERIOD = 5;  // Number of periods for moving average
 let selectedStrategy = null; 
 
-const MOCK_API_URL = process.env.MOCK_API_URL || "https://api.mock.com/stock";
+
+const MOCK_API_URL = process.env.MOCK_API_URL || "http://localhost:4000/mock-stock-price";
 
 // Mock function to simulate fetching stock price
 async function fetchStockPrice() {
   try {
     const response = await axios.get(MOCK_API_URL);
+    console.log(response.data.price);
     return response.data.price;
   } catch (error) {
+    // console.log("galti 1");
     logger.error(`Error fetching stock price: ${error.message}`);
     throw new Error('Could not fetch stock price.');
   }
@@ -58,6 +61,7 @@ async function evaluateSimpleStrategy() {
 
     lastPrice = currentPrice;
   } catch (error) {
+    // console.log("galti 2");
     logger.error(`Error in Simple Strategy: ${error.message}`);
   }
 }
